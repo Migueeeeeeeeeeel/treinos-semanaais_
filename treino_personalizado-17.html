@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treino Personalizado</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+
+*{box-sizing:border-box}
+:root{
+  --bg:#030712;
+  --panel:rgba(8,16,31,.82);
+  --panel2:rgba(11,25,45,.72);
+  --line:rgba(56,189,248,.24);
+  --cyan:#22d3ee;
+  --blue:#38bdf8;
+  --green:#39ff88;
+  --purple:#9b5cff;
+  --text:#e6f7ff;
+  --muted:#8ba7bc;
+}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:'Rajdhani',Arial,sans-serif;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(34,211,238,.14),transparent 30%),
+    radial-gradient(circle at 85% 80%,rgba(155,92,255,.13),transparent 30%),
+    linear-gradient(135deg,#02050b,#071322 55%,#02050b);
+  overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;
+  background-image:linear-gradient(rgba(56,189,248,.06) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(56,189,248,.06) 1px,transparent 1px);
+  background-size:38px 38px;
+  mask-image:linear-gradient(to bottom,black,transparent 90%);
+}
+.container{width:min(1000px,92%);margin:auto;padding:42px 0 60px;position:relative}
+.card{
+  position:relative;overflow:hidden;
+  background:linear-gradient(145deg,var(--panel),var(--panel2));
+  border:1px solid var(--line);
+  border-radius:24px;padding:32px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.025) inset,
+             0 18px 70px rgba(0,0,0,.55),
+             0 0 45px rgba(34,211,238,.06);
+}
+.card:before{
+  content:"";position:absolute;left:0;top:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);
+  box-shadow:0 0 18px var(--cyan);
+}
+h1,h2{
+  font-family:'Orbitron',sans-serif;letter-spacing:1px;
+}
+h1{
+  font-size:clamp(28px,6vw,52px);margin:0 0 12px;
+  background:linear-gradient(90deg,#fff,var(--cyan),#a78bfa);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h2{margin-top:0;color:#dffaff}
+p{color:#9fb8ca;line-height:1.6}
+.screen{display:none}.screen.active{display:block;animation:boot .35s ease-out}
+@keyframes boot{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:28px}
+button,.choice{
+  border-radius:17px;padding:18px;font-family:'Rajdhani',sans-serif;
+  font-size:18px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.choice{
+  background:linear-gradient(145deg,rgba(15,32,53,.9),rgba(5,13,25,.95));
+  color:var(--text);text-align:left;border:1px solid rgba(56,189,248,.22);
+  position:relative;overflow:hidden;
+}
+.choice:after{
+  content:"";position:absolute;inset:-100% 50% auto -100%;
+  height:220%;transform:rotate(25deg);
+  background:rgba(255,255,255,.06);transition:.4s;
+}
+.choice:hover{transform:translateY(-4px);border-color:var(--cyan);box-shadow:0 0 28px rgba(34,211,238,.14)}
+.choice:hover:after{left:120%}
+.choice.selected{border-color:var(--green)}
+.icon{font-size:42px;display:block;margin-bottom:8px;filter:drop-shadow(0 0 10px rgba(34,211,238,.3))}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:22px 0}
+.option{
+  background:rgba(255,255,255,.035);color:#cfe8f4;
+  border:1px solid rgba(56,189,248,.17);
+}
+.option:hover{border-color:rgba(34,211,238,.65);background:rgba(34,211,238,.06)}
+.option.selected{
+  border-color:var(--green);background:rgba(57,255,136,.08);
+  color:#dffff0;box-shadow:0 0 18px rgba(57,255,136,.08);
+}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.primary,.secondary{border:1px solid}
+.primary{
+  background:linear-gradient(90deg,#18c981,#39ff88);color:#001b0d;
+  border-color:#39ff88;box-shadow:0 0 22px rgba(57,255,136,.15)
+}
+.primary:hover{box-shadow:0 0 30px rgba(57,255,136,.3);transform:translateY(-2px)}
+.secondary{background:#0b1728;color:#b8d4e4;border-color:#29445b}
+.secondary:hover{border-color:#38bdf8;color:white}
+#error{color:#ff8d9b;font-weight:700;min-height:22px}
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px;margin-top:24px}
+.day{
+  background:linear-gradient(145deg,rgba(10,24,41,.9),rgba(4,11,22,.95));
+  border:1px solid rgba(56,189,248,.16);border-radius:18px;padding:20px;
+  position:relative;box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
+.day:before{
+  content:"";position:absolute;left:0;top:16px;width:3px;height:34px;
+  background:linear-gradient(var(--cyan),var(--purple));border-radius:0 4px 4px 0;
+  box-shadow:0 0 12px rgba(34,211,238,.5)
+}
+.day h3{margin:0 0 8px 8px;color:var(--cyan);font-family:'Orbitron',sans-serif;font-size:16px}
+.day strong{color:#e9faff;margin-left:8px}
+.day ul{padding-left:28px;color:#a9c1d0;line-height:1.6}
+.day li{margin:7px 0}
+.badge{
+  display:inline-block;padding:7px 11px;border-radius:99px;
+  background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);
+  color:#9cefff;margin:3px;font-weight:700
+}
+.small{font-size:13px;color:#718da2}
+</style>
+</head>
+<body>
+<div class="container">
+
+<section id="home" class="screen active">
+<div class="card">
+<h1>🏆 Treino Personalizado</h1>
+<p>Escolha seu objetivo e monte uma rotina semanal baseada nas suas preferências.</p><p class="small">● SISTEMA ONLINE &nbsp;|&nbsp; PERSONAL TRAINING AI &nbsp;|&nbsp; PROTOCOLO ATIVO</p>
+<div class="choices">
+<button class="choice" onclick="chooseSport('futebol')"><span class="icon">⚽</span>Futebol<br><span class="small">Fundamentos e desempenho</span></button>
+<button class="choice" onclick="chooseSport('academia')"><span class="icon">🏋️</span>Academia<br><span class="small">Força e condicionamento</span></button>
+<button class="choice" onclick="chooseSport('basquete')"><span class="icon">🏀</span>Basquete<br><span class="small">Arremesso, drible e explosão</span></button>
+<button class="choice" onclick="chooseSport('volei')"><span class="icon">🏐</span>Vôlei<br><span class="small">Manchete, toque e ataque</span></button>
+<button class="choice" onclick="chooseSport('natacao')"><span class="icon">🏊</span>Natação<br><span class="small">Técnica e condicionamento</span></button>
+<button class="choice" onclick="chooseSport('tenis')"><span class="icon">🎾</span>Tênis<br><span class="small">Golpes, saque e movimentação</span></button>
+<button class="choice" onclick="chooseSport('beachtenis')"><span class="icon">🏖️</span>Beach Tennis<br><span class="small">Golpes, saque e movimentação na areia</span></button>
+</div>
+</div>
+</section>
+
+<section id="preferences" class="screen">
+<div class="card">
+<h2 id="prefTitle"></h2>
+<p id="prefDescription"></p>
+<div id="options" class="options"></div>
+<div id="error"></div>
+<div class="actions">
+<button class="secondary" onclick="goHome()">← Voltar</button>
+<button class="primary" onclick="generatePlan()">Gerar rotina →</button>
+</div>
+</div>
+</section>
+
+<section id="result" class="screen">
+<div class="card">
+<h2>📅 Sua rotina semanal</h2>
+<p id="summary"></p>
+<div id="week" class="week"></div>
+<div class="actions">
+<button class="secondary" onclick="goHome()">← Fazer outro treino</button>
+</div>
+<p class="small">Esta é uma sugestão geral. Para adolescentes, a prioridade deve ser técnica, segurança, recuperação e orientação de um professor/treinador.</p>
+</div>
+</section>
+
+</div>
+
+<script>
+let sport='';
+let selected=[];
+
+const data={
+futebol:{
+title:'⚽ MODO FUTEBOL // SELECIONE SEUS FUNDAMENTOS',
+description:'Escolha os fundamentos que você quer desenvolver. O sistema monta sessões específicas com exercícios, séries, repetições e descanso.',
+options:[
+['drible','Drible'],['passe','Passe'],['finalizacao','Finalização'],['controle','Controle de bola'],
+['conducao','Condução'],['velocidade','Velocidade'],['resistencia','Resistência'],['agilidade','Agilidade']
+]},
+academia:{
+title:'🏋️ MODO ACADEMIA // DEFINA SEU OBJETIVO',
+description:'Escolha os objetivos que deseja desenvolver. A rotina prioriza técnica, recuperação e desenvolvimento geral.',
+options:[
+['forca','Força'],['musculos','Desenvolvimento muscular'],['resistencia','Resistência'],
+['mobilidade','Mobilidade'],['condicionamento','Condicionamento'],['tecnica','Técnica e postura']
+]},
+basquete:{
+title:'🏀 MODO BASQUETE // SELECIONE SEUS FUNDAMENTOS',
+description:'Escolha as habilidades que você quer desenvolver.',
+options:[
+['drible','Drible'],['passe','Passe'],['arremesso','Arremesso'],['bandeja','Bandeja'],
+['velocidade','Velocidade'],['agilidade','Agilidade'],['resistencia','Resistência'],['salto','Salto e explosão']
+]},
+volei:{
+title:'🏐 MODO VÔLEI // SELECIONE SEUS FUNDAMENTOS',
+description:'Escolha os fundamentos que você quer desenvolver.',
+options:[
+['manchete','Manchete'],['toque','Toque'],['saque','Saque'],['ataque','Ataque'],
+['bloqueio','Bloqueio'],['agilidade','Agilidade'],['salto','Salto e impulsão'],['resistencia','Resistência']
+]},
+natacao:{
+title:'🏊 MODO NATAÇÃO // SELECIONE SEUS OBJETIVOS',
+description:'Escolha as capacidades que você quer desenvolver. Treinos aquáticos devem ser feitos em local apropriado e com supervisão.',
+options:[
+['tecnica','Técnica de nado'],['resistencia','Resistência'],['velocidade','Velocidade'],
+['respiracao','Coordenação da respiração'],['virada','Viradas'],['condicionamento','Condicionamento']
+]},
+tenis:{
+title:'🎾 MODO TÊNIS // SELECIONE SEUS FUNDAMENTOS',
+description:'Escolha as habilidades que você quer desenvolver.',
+options:[
+['forehand','Forehand'],['backhand','Backhand'],['saque','Saque'],['voleio','Voleio'],
+['deslocamento','Deslocamento'],['velocidade','Velocidade'],['resistencia','Resistência'],['controle','Controle']
+]},
+beachtenis:{
+title:'🏖️ MODO BEACH TENNIS // SELECIONE SEUS FUNDAMENTOS',
+description:'Escolha as habilidades que você quer desenvolver na areia.',
+options:[
+['forehand','Forehand'],['backhand','Backhand'],['saque','Saque'],['voleio','Voleio'],
+['smash','Smash'],['defesa','Defesa'],['deslocamento','Deslocamento na areia'],['resistencia','Resistência']
+]}
+};
+
+const drills={
+futebol:{
+drible:['Aqueça 5–8 min.','Faça 5 passagens entre 6 objetos, usando mudanças de direção.','Faça 4×30 s de drible livre, com 30 s de descanso.','Finalize com 5 min leves.'],
+passe:['Aqueça 5 min.','Faça 4×20 passes curtos com cada pé.','Faça 3×10 passes em movimento.','Faça 2×10 passes de primeira, priorizando precisão.'],
+finalizacao:['Aqueça 8 min com condução e passes.','Faça 3×8 finalizações após passe.','Faça 2×6 finalizações com o pé não dominante.','Descanse 60–90 s entre séries.'],
+controle:['Aqueça 5 min.','Faça 3×10 domínios orientados de passe rasteiro.','Faça 3×8 controles alternando os pés.','Pratique 10 recepções aéreas leves, se houver espaço e supervisão.'],
+conducao:['Aqueça 5 min.','Faça 4×20 m conduzindo com o pé dominante.','Faça 4×20 m alternando os pés.','Faça 4 mudanças de direção com bola.'],
+velocidade:['Aqueça 8 min.','Faça 6 arrancadas de 10–15 m, retornando caminhando.','Descanse até recuperar a respiração entre esforços.','Faça 4 mudanças de direção curtas com controle.'],
+resistencia:['Aqueça 5 min.','Faça 15–25 min de corrida leve ou jogo reduzido confortável.','Caminhe 5 min para finalizar.'],
+agilidade:['Aqueça 5–8 min.','Faça 4×20 s de deslocamento lateral, com 40 s de descanso.','Faça 4 passagens em zigue-zague.','Finalize com 5 min leves.']
+},
+academia:{
+forca:['Aqueça 5–8 min.','Faça 2×8–12 agachamentos com peso corporal.','Faça 2×6–10 flexões adaptadas.','Faça 2×8–12 elevações de quadril.'],
+musculos:['Aqueça 5–8 min.','Faça 2×8–12 agachamentos controlados.','Faça 2×6–10 flexões adaptadas.','Faça 2×8–12 remadas com elástico, se houver equipamento e orientação.'],
+resistencia:['Faça 5 min de caminhada.','Faça 15–25 min de caminhada rápida, bicicleta ou corrida leve.','Finalize com 5 min leves.'],
+mobilidade:['Faça 8 movimentos de mobilidade de tornozelo por lado.','Faça 8 movimentos de mobilidade de quadril por lado.','Faça 8 círculos de ombros para cada direção.','Faça alongamentos leves de 20–30 s.'],
+condicionamento:['Aqueça 5–8 min.','Faça 3 voltas: 10 agachamentos + 6–10 flexões adaptadas + 30 s de caminhada rápida/trote.','Descanse 1–2 min entre voltas.'],
+tecnica:['Faça 2×8–10 agachamentos lentos.','Faça 2×6–10 flexões adaptadas.','Faça 2×8–12 elevações de quadril.','Priorize postura e execução; não aumente carga para compensar técnica.']
+},
+basquete:{
+drible:['Aqueça 5–8 min.','Faça 4×30 s de drible baixo com a mão direita.','Faça 4×30 s com a esquerda.','Faça 4 passagens em zigue-zague, trocando de mão nas mudanças de direção.'],
+passe:['Aqueça 5 min.','Faça 3×20 passes de peito com parceiro ou alvo.','Faça 3×15 passes quicados.','Faça 3×10 passes após deslocamento lateral.'],
+arremesso:['Aqueça 8 min.','Faça 3×10 arremessos próximos à cesta, priorizando técnica.','Faça 3×8 arremessos de média distância confortável.','Pare quando a técnica começar a piorar.'],
+bandeja:['Aqueça 5–8 min.','Faça 3×6 bandejas pelo lado direito.','Faça 3×6 pelo lado esquerdo.','Faça 2×6 alternando os lados.'],
+velocidade:['Aqueça 8 min.','Faça 6 arrancadas de 10–15 m.','Caminhe de volta para recuperar.','Faça 4 deslocamentos defensivos laterais curtos.'],
+agilidade:['Aqueça 5–8 min.','Faça 4×20 s de deslocamento lateral.','Faça 4 percursos em zigue-zague.','Descanse 40–60 s entre esforços.'],
+resistencia:['Aqueça 5 min.','Faça 15–20 min de movimentação contínua leve/moderada com bola.','Finalize com 5 min caminhando.'],
+salto:['Aqueça 8 min.','Faça 2×6 saltos verticais com aterrissagem controlada.','Descanse 60–90 s.','Faça 3×5 saltos com pequeno deslocamento, sem buscar altura máxima.']
+},
+volei:{
+manchete:['Aqueça 5 min.','Faça 3×20 manchetes para um alvo.','Faça 3×10 recepções após deslocamento lateral.'],
+toque:['Aqueça 5 min.','Faça 3×20 toques para cima.','Faça 3×10 toques alternando altura e direção.'],
+saque:['Aqueça 8 min.','Faça 3×8 saques buscando uma área-alvo.','Descanse 45–60 s entre séries.','Priorize precisão em vez de força.'],
+ataque:['Aqueça ombros e braços por 8 min.','Faça 3×6 movimentos de ataque sem máxima força, focando na coordenação.','Se tiver rede e treinador, faça 3×6 ataques técnicos.'],
+bloqueio:['Aqueça 8 min.','Faça 3×6 saltos de bloqueio com aterrissagem controlada.','Faça 3×6 deslocamentos laterais + salto.'],
+agilidade:['Aqueça 5–8 min.','Faça 4×20 s de deslocamento lateral.','Faça 4 passagens de reação entre duas marcas.'],
+salto:['Aqueça 8 min.','Faça 2×6 saltos verticais.','Descanse 60–90 s.','Faça 3×5 saltos com foco na aterrissagem segura.'],
+resistencia:['Faça 5 min de aquecimento.','Faça 15–20 min de deslocamentos leves/moderados ou treino técnico contínuo.','Caminhe 5 min para finalizar.']
+},
+natacao:{
+tecnica:['Faça 5–10 min de aquecimento leve na água.','Faça 4×25 m focando na posição do corpo e na técnica do nado.','Descanse 30–60 s entre repetições.'],
+resistencia:['Aqueça 5–10 min.','Faça 6×50 m em ritmo confortável, descansando 30–60 s.','Finalize com 5 min leves.'],
+velocidade:['Aqueça 10 min.','Faça 6×25 m rápidos, mas controlados.','Descanse 60–90 s entre repetições.','Finalize com 5 min leves.'],
+respiracao:['Aqueça 5–10 min.','Faça 4×25 m praticando respiração coordenada sem prender o ar por tempo excessivo.','Descanse 30–60 s.'],
+virada:['Pratique a aproximação da parede em baixa intensidade.','Faça 6 repetições de entrada e saída da parede com técnica.','Priorize controle e segurança.'],
+condicionamento:['Aqueça 10 min.','Faça 8×50 m em ritmo confortável/moderado, com 30–60 s de descanso.','Finalize com 5 min leves.']
+},
+tenis:{
+forehand:['Aqueça 5–8 min.','Faça 3×10 forehands cruzados de baixa intensidade.','Faça 3×10 alternando direção.'],
+backhand:['Aqueça 5–8 min.','Faça 3×10 backhands cruzados.','Faça 3×10 alternando direção.'],
+saque:['Aqueça ombros por 5–8 min.','Faça 3×8 saques focando no lançamento consistente da bola.','Descanse 60 s entre séries.'],
+voleio:['Aqueça 5 min.','Faça 3×10 voleios de cada lado próximos à rede.','Priorize controle e posicionamento.'],
+deslocamento:['Aqueça 8 min.','Faça 4×20 s de deslocamento lateral.','Faça 4 passagens de aproximação e recuperação.'],
+velocidade:['Aqueça 8 min.','Faça 6 deslocamentos curtos de 10–15 m.','Recupere caminhando entre esforços.'],
+resistencia:['Aqueça 5 min.','Faça 20–30 min de prática contínua em intensidade confortável.','Finalize com 5 min caminhando.'],
+controle:['Faça 5 min de aquecimento.','Faça 3×20 trocas controladas com parceiro ou contra uma parede adequada.','Priorize consistência antes de potência.']
+},
+beachtenis:{
+forehand:['Aqueça 8 min na areia com caminhada e deslocamentos leves.','Faça 3×10 forehands controlados, buscando altura e direção.','Faça 3×10 alternando zonas da quadra.'],
+backhand:['Aqueça 8 min.','Faça 3×10 backhands controlados.','Faça 3×10 alternando direção, priorizando posicionamento.'],
+saque:['Aqueça ombros e punhos por 5–8 min.','Faça 3×8 saques buscando uma área-alvo.','Descanse 60 s entre séries e priorize precisão.'],
+voleio:['Aqueça 5–8 min.','Faça 3×10 voleios de cada lado próximos à rede.','Faça 3×10 voleios direcionados para áreas diferentes da quadra.'],
+smash:['Aqueça ombros por 8 min.','Faça 3×6 movimentos de smash sem força máxima, focando na coordenação.','Com parceiro, faça 3×6 bolas altas para finalizar, se houver orientação adequada.'],
+defesa:['Aqueça 8 min.','Faça 4×20 s de deslocamento lateral na areia.','Faça 3×8 defesas de bolas altas ou profundas, priorizando controle.'],
+deslocamento:['Aqueça 8–10 min.','Faça 4×20 s de deslocamentos laterais na areia.','Faça 4 passagens de ida e volta entre duas marcas, caminhando para recuperar.'],
+resistencia:['Aqueça 8 min.','Faça 20–30 min de prática técnica contínua em intensidade confortável.','Faça 5 min de caminhada leve para finalizar.']
+}
+};
+
+function show(id){
+document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+document.getElementById(id).classList.add('active'); window.scrollTo(0,0);
+}
+function chooseSport(s){
+sport=s; selected=[];
+document.getElementById('prefTitle').textContent=data[s].title;
+document.getElementById('prefDescription').textContent=data[s].description;
+const box=document.getElementById('options'); box.innerHTML='';
+data[s].options.forEach(([id,label])=>{
+const b=document.createElement('button');
+b.className='option'; b.dataset.id=id; b.textContent=label;
+b.onclick=()=>toggle(id,b); box.appendChild(b);
+});
+document.getElementById('error').textContent=''; show('preferences');
+}
+function toggle(id,b){
+if(selected.includes(id)){selected=selected.filter(x=>x!==id);b.classList.remove('selected')}
+else{selected.push(id);b.classList.add('selected')}
+}
+function goHome(){show('home')}
+function labelFor(id){return data[sport].options.find(x=>x[0]===id)?.[1]||id}
+
+function generatePlan(){
+if(!selected.length){document.getElementById('error').textContent='Escolha pelo menos uma opção.';return}
+const pool=drills[sport];
+const chosen=selected.flatMap(x=>pool[x]||[]);
+
+let days;
+if(sport==='futebol') days=[
+['SEG','Técnica // foco principal',pool[selected[0]]||[]],
+['TER','Velocidade + agilidade',pool.velocidade.concat(pool.agilidade)],
+['QUA','RECUPERAÇÃO', ['15–20 min de caminhada leve.','5–8 min de mobilidade confortável.','Sem treino intenso.']],
+['QUI','Técnica // segundo foco',pool[selected[Math.min(1,selected.length-1)]]||[]],
+['SEX','Resistência + fundamentos',pool.resistencia.concat((pool[selected[0]]||[]).slice(0,2))],
+['SÁB','Prática leve',chosen.slice(0,4)],
+['DOM','DESCANSO',['Descanse e deixe o corpo se recuperar.']]
+];
+else if(sport==='academia') days=[
+['SEG','Treino // objetivo principal',pool[selected[0]]||[]],
+['TER','Condicionamento',pool.condicionamento],
+['QUA','RECUPERAÇÃO', ['15–20 min de caminhada leve.','5–8 min de mobilidade confortável.','Sem treino intenso.']],
+['QUI','Treino // segundo objetivo',pool[selected[Math.min(1,selected.length-1)]]||[]],
+['SEX','Objetivos selecionados',chosen.slice(0,5)],
+['SÁB','Atividade leve',['20–30 min de caminhada, bicicleta leve ou outra atividade confortável.','Alongamentos leves por alguns minutos.']],
+['DOM','DESCANSO',['Descanse e deixe o corpo se recuperar.']]
+];
+else if(sport==='beachtenis') days=[
+['SEG','Técnica // foco principal',pool[selected[0]]||[]],
+['TER','Deslocamento na areia', (pool.deslocamento||[]).concat(pool.defesa||[])],
+['QUA','RECUPERAÇÃO',['15–20 min de caminhada leve.','5–8 min de mobilidade de tornozelos, quadril e ombros.','Sem treino intenso.']],
+['QUI','Técnica // segundo foco',pool[selected[Math.min(1,selected.length-1)]]||[]],
+['SEX','Resistência + fundamentos', (pool.resistencia||[]).concat((pool[selected[0]]||[]).slice(0,2))],
+['SÁB','Prática leve',chosen.slice(0,4)],
+['DOM','DESCANSO',['Descanse e deixe o corpo se recuperar.']]
+];
+else days=[
+['SEG','Técnica // foco principal',pool[selected[0]]||[]],
+['TER','Atletismo específico', (pool.velocidade||[]).concat(pool.agilidade||pool.deslocamento||[])],
+['QUA','RECUPERAÇÃO',['15–20 min de caminhada leve.','5–8 min de mobilidade.','Sem treino intenso.']],
+['QUI','Técnica // segundo foco',pool[selected[Math.min(1,selected.length-1)]]||[]],
+['SEX','Condicionamento',pool.resistencia||pool.condicionamento||pool.salto||[]],
+['SÁB','Prática leve',chosen.slice(0,4)],
+['DOM','DESCANSO',['Descanse e deixe o corpo se recuperar.']]
+];
+
+document.getElementById('summary').innerHTML='FOCO: '+selected.map(x=>'<span class="badge">'+labelFor(x)+'</span>').join(' ');
+const week=document.getElementById('week'); week.innerHTML='';
+days.forEach(([day,focus,items])=>{
+const card=document.createElement('div'); card.className='day';
+card.innerHTML='<h3>'+day+'</h3><strong>'+focus+'</strong><ul>'+items.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+week.appendChild(card);
+});
+show('result');
+}
+</script>
+</body>
+</html>
